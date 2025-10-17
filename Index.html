@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SheRide - Welcome</title>
+    
+    <style>
+        /* ============================================= */
+        /* CSS Variables & Global Styles                 */
+        /* ============================================= */
+        :root {
+            /* Color Palette */
+            --bg-gradient: linear-gradient(160deg, #fff0f5 0%, #ffe4e1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --cta-gradient: linear-gradient(90deg, #ff85a2 0%, #ff6b95 100%);
+            --cta-shadow-color: rgba(255, 107, 149, 0.4);
+            --text-primary: #581845;
+            --text-secondary: #900c3f;
+            --shadow-color: rgba(215, 153, 183, 0.15);
+            
+            /* Sizing & Radius */
+            --radius-pill: 100px;
+            --radius-card: 24px;
+            --radius-button: 20px;
+
+            /* Effects */
+            --blur-amount: 12px;
+            --shadow-light: 0 4px 12px var(--shadow-color);
+            --shadow-heavy: 0 8px 30px var(--shadow-color);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================= */
+        /* Page Container & Transitions                  */
+        /* ============================================= */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            max-width: 375px; /* iPhone X/11/12 viewport width */
+            max-height: 812px; /* iPhone X/11/12 viewport height */
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-gradient);
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        /* Page transition states */
+        .page-hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+
+        .page-entering {
+             opacity: 0;
+             transform: translateX(-20px);
+        }
+
+        /* ============================================= */
+        /* Welcome Page Styles                           */
+        /* ============================================= */
+        #welcome-page {
+            justify-content: space-between;
+        }
+        
+        /* --- Header / Logo --- */
+        .welcome-header {
+            animation: fadeInDown 0.8s ease-out forwards;
+        }
+        
+        .logo-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            padding: 8px;
+            width: fit-content;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount)); /* Safari support */
+        }
+        
+        .logo-sr {
+            background: white;
+            color: var(--text-secondary);
+            font-weight: 800;
+            font-size: 1.2rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+        }
+        
+        .logo-text {
+            padding-right: 16px;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .logo-text p {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            opacity: 0.9;
+        }
+
+        /* --- Feature Cards --- */
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: -20px; /* Adjust vertical spacing */
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 20px;
+            box-shadow: var(--shadow-heavy);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount)); /* Safari support */
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0; /* Initially hidden for animation */
+            animation: float 4s ease-in-out infinite, fadeInUp 0.8s ease-out forwards;
+        }
+
+        /* Staggered animation delay */
+        .feature-card:nth-child(1) {
+            animation-delay: 0.2s, 0.2s; /* float, fadeInUp */
+        }
+        .feature-card:nth-child(2) {
+            animation-delay: 0.4s, 0.4s; /* float, fadeInUp */
+        }
+        
+        .feature-card .icon {
+            font-size: 1.8rem;
+        }
+        
+        .feature-card h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .feature-card p {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            opacity: 0.9;
+        }
+
+        /* --- CTA Button --- */
+        .welcome-footer {
+            padding-bottom: 24px; /* Space for home indicator */
+            animation: fadeInUp 0.8s ease-out 0.6s forwards;
+            opacity: 0;
+        }
+        
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            border-radius: var(--radius-button);
+            border: none;
+            background: var(--cta-gradient);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 20px var(--cta-shadow-color);
+            transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.2s ease;
+        }
+        
+        /* Accessible focus state */
+        .cta-button:focus-visible {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: 3px;
+        }
+        
+        .cta-button:active {
+            transform: scale(0.97);
+            box-shadow: 0 3px 10px var(--cta-shadow-color);
+        }
+
+        /* ============================================= */
+        /* Signup Demo Page Styles                       */
+        /* ============================================= */
+        #signup-page {
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
+
+        a {
+  text-decoration: none;
+}
+
+        #signup-page h1 {
+          font-size: 2rem;
+          margin-bottom: 24px;
+        }
+
+        .back-button {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 12px 24px;
+            border-radius: var(--radius-pill);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .back-button:focus-visible {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: 3px;
+        }
+
+        /* ============================================= */
+        /* Keyframe Animations                           */
+        /* ============================================= */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container" role="application">
+        
+        <main id="welcome-page" class="page" aria-labelledby="welcome-heading">
+            
+            <header class="welcome-header">
+                <div class="logo-pill">
+                    <div class="logo-sr" aria-hidden="true">SR</div>
+                    <div class="logo-text">
+                        <h1 id="welcome-heading">SheRide</h1>
+                        <p>Safe · Secure · Women-first rides</p>
+                    </div>
+                </div>
+            </header>
+
+            <section class="features" aria-label="App Features">
+                <div class="feature-card" role="article">
+                    <span class="icon" aria-hidden="true">🛡️</span>
+                    <h2>Verified & Safe</h2>
+                    <p>Every driver is background-checked and trained to ensure your safety and comfort.</p>
+                </div>
+                <div class="feature-card" role="article">
+                    <span class="icon" aria-hidden="true">📍</span>
+                    <h2>SOS & Share ETA</h2>
+                    <p>Instantly share your ride status with trusted contacts or alert our team with one tap.</p>
+                </div>
+            </section>
+            
+            <footer class="welcome-footer">
+                <a href="/home/fayaz/Documents/SheRide/New/login.html"><button id="get-started-btn" class="cta-button" aria-label="Get Started with SheRide">Get Started</button></a>
+            </footer>
+
+        </main>
+        
+      
+
+    </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const welcomePage = document.getElementById('welcome-page');
+    const signupPage = document.getElementById('signup-page');
+    const getStartedBtn = document.getElementById('get-started-btn');
+    const backBtn = document.getElementById('back-btn');
+
+    // Hide all pages initially except welcome
+    signupPage.classList.add('page-hidden');
+
+    // Smooth transition from Welcome → Signup
+    getStartedBtn.addEventListener('click', () => {
+        welcomePage.classList.add('page-leaving');
+
+        // Wait for animation to finish before hiding
+        setTimeout(() => {
+            welcomePage.classList.add('page-hidden');
+            welcomePage.classList.remove('page-leaving');
+
+            signupPage.classList.remove('page-hidden');
+            signupPage.classList.add('page-entering');
+
+            setTimeout(() => signupPage.classList.remove('page-entering'), 400);
+        }, 400); // Adjust based on your CSS transition time
+    });
+
+    // Smooth transition from Signup → Welcome
+    backBtn.addEventListener('click', () => {
+        signupPage.classList.add('page-leaving');
+
+        setTimeout(() => {
+            signupPage.classList.add('page-hidden');
+            signupPage.classList.remove('page-leaving');
+
+            welcomePage.classList.remove('page-hidden');
+            welcomePage.classList.add('page-entering');
+
+            setTimeout(() => welcomePage.classList.remove('page-entering'), 400);
+        }, 400);
+    });
+});
+</script>
+
+</body>
+</html>

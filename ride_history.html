@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SheRide - Ride History</title>
+    
+    <style>
+        /* ============================================= */
+        /* CSS Variables & Global Styles                 */
+        /* ============================================= */
+        :root {
+            /* Color Palette */
+            --bg-gradient: linear-gradient(160deg, #fff0f5 0%, #ffe4e1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --cta-gradient: linear-gradient(90deg, #ff85a2 0%, #ff6b95 100%);
+            --cta-shadow-color: rgba(255, 107, 149, 0.4);
+            --text-primary: #581845;
+            --text-secondary: #900c3f;
+            --text-light: #a36f8a;
+            --shadow-color: rgba(215, 153, 183, 0.2);
+            --status-completed-bg: rgba(46, 204, 113, 0.15);
+            --status-completed-text: #27ae60;
+            --status-cancelled-bg: rgba(127, 140, 141, 0.15);
+            --status-cancelled-text: #7f8c8d;
+            
+            /* Sizing & Radius */
+            --radius-pill: 100px;
+            --radius-card: 20px;
+            --radius-button: 16px;
+
+            /* Effects */
+            --blur-amount: 14px;
+            --shadow-light: 0 4px 12px var(--shadow-color);
+            --shadow-heavy: 0 8px 30px var(--shadow-color);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================= */
+        /* Page Container & Layout                       */
+        /* ============================================= */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            max-width: 375px;
+            max-height: 812px;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-gradient);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 24px 16px 24px;
+            flex-shrink: 0;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        .header-icon {
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .page-header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* ============================================= */
+        /* Segmented Control Toggle                      */
+        /* ============================================= */
+        .filter-nav {
+            padding: 0 24px 20px 24px;
+            flex-shrink: 0;
+            animation: fadeInDown 0.6s ease-out 0.1s;
+        }
+        .segmented-control {
+            display: flex;
+            /* Changed to allow natural widths */
+            justify-content: space-between;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            padding: 4px;
+            position: relative;
+        }
+        .control-pill {
+            position: absolute;
+            top: 4px;
+            left: 0; /* JS will handle position */
+            /* Width is now set by JS */
+            height: calc(100% - 8px);
+            background: white;
+            border-radius: var(--radius-pill);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 1;
+        }
+        .control-button {
+            /* Removed flex-grow to allow variable widths */
+            padding: 12px 0;
+            border: none;
+            background: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            z-index: 2;
+            transition: color 0.3s ease;
+            text-align: center;
+        }
+        /* -- SETTING DIFFERENT WIDTHS -- */
+        .control-button[data-filter="all"] {
+            flex-basis: 25%; /* Shorter width for "All" */
+        }
+        .control-button[data-filter="completed"],
+        .control-button[data-filter="cancelled"] {
+            flex-basis: 37.5%; /* Longer width for the others */
+        }
+
+        .control-button.active {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .control-button:focus-visible {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: -2px;
+            border-radius: var(--radius-pill);
+        }
+
+        /* ============================================= */
+        /* Ride History List                             */
+        /* ============================================= */
+        .ride-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 24px 40px 24px;
+        }
+        .ride-list {
+            list-style: none;
+        }
+        .ride-card-wrapper {
+            transition: opacity 0.4s ease, max-height 0.4s ease, margin-bottom 0.4s ease;
+            max-height: 150px; /* Approximate height for transition */
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .ride-card-wrapper.hidden {
+            opacity: 0;
+            max-height: 0;
+            margin-bottom: 0;
+        }
+
+        .ride-card {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out backwards;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .ride-card:hover {
+            transform: scale(1.02);
+            box-shadow: var(--shadow-heavy);
+        }
+        .ride-card:focus-visible {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: 2px;
+        }
+        
+        /* Ripple Effect */
+        .ride-card::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            width: 100px;
+            height: 100px;
+            margin-top: -50px;
+            margin-left: -50px;
+            top: 50%;
+            left: 50%;
+            opacity: 0;
+            transform: scale(0);
+        }
+        .ride-card:active::after {
+            opacity: 1;
+            transform: scale(4);
+            transition: transform 0.5s ease, opacity 1s ease;
+        }
+
+        .ride-info { flex-grow: 1; }
+        .ride-meta {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        .ride-locations {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        a {
+  text-decoration: none;
+}
+
+        .ride-locations span { display: block; }
+        .ride-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+        .ride-fare {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: var(--radius-pill);
+        }
+        .status-badge.completed { background-color: var(--status-completed-bg); color: var(--status-completed-text); }
+        .status-badge.cancelled { background-color: var(--status-cancelled-bg); color: var(--status-cancelled-text); }
+
+        .ride-icon {
+            font-size: 2rem;
+            margin-left: 16px;
+        }
+
+        /* ============================================= */
+        /* Ride Detail Modal                             */
+        /* ============================================= */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            border-top-left-radius: var(--radius-card);
+            border-top-right-radius: var(--radius-card);
+            padding: 24px;
+            width: 100%;
+            max-width: 375px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { font-size: 1.2rem; }
+        .close-btn { font-size: 1.8rem; background: none; border: none; color: var(--text-light); cursor: pointer; }
+        .modal-detail-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 0.95rem; }
+        .modal-detail-row span:first-child { color: var(--text-light); }
+        .modal-detail-row span:last-child { font-weight: 500; }
+        .modal-cta {
+            display: block; width: 100%; padding: 18px; border-radius: var(--radius-button); border: none; background: var(--cta-gradient); color: white; font-size: 1.1rem; font-weight: 600; cursor: pointer; box-shadow: 0 6px 20px var(--cta-shadow-color); margin-top: 24px;
+        }
+
+        /* ============================================= */
+        /* Keyframe Animations                           */
+        /* ============================================= */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <header class="page-header">
+            <a href="home.html"><button class="header-icon" aria-label="Go back">←</button></a>
+            <h1>Ride History</h1>
+            <a href="profile.html"><button class="header-icon" aria-label="View profile">👤</button></a>
+        </header>
+
+        <nav class="filter-nav" aria-label="Filter ride history">
+            <div id="segmented-control" class="segmented-control">
+                <div id="control-pill" class="control-pill"></div>
+                <button class="control-button active" data-filter="all" aria-pressed="true">All</button>
+                <button class="control-button" data-filter="completed" aria-pressed="false">Completed</button>
+                <button class="control-button" data-filter="cancelled" aria-pressed="false">Cancelled</button>
+            </div>
+        </nav>
+
+        <main class="ride-list-container">
+            <ul id="ride-list" class="ride-list">
+                <li class="ride-card-wrapper" data-status="completed" style="animation-delay: 0.1s;">
+                    <button class="ride-card" aria-label="View details for ride on October 16, 2025">
+                        <div class="ride-info">
+                            <div class="ride-meta">Oct 16, 2025, 08:30 PM</div>
+                            <div class="ride-locations">
+                                <span>📍 Connaught Place</span>
+                                <span>🏁 Hauz Khas Village</span>
+                            </div>
+                            <div class="ride-details">
+                                <span class="ride-fare">₹157</span>
+                                <span class="status-badge completed">Completed</span>
+                            </div>
+                        </div>
+                        <div class="ride-icon" aria-hidden="true">🚗</div>
+                    </button>
+                </li>
+                <li class="ride-card-wrapper" data-status="completed" style="animation-delay: 0.2s;">
+                    <button class="ride-card" aria-label="View details for ride on October 15, 2025">
+                        <div class="ride-info">
+                            <div class="ride-meta">Oct 15, 2025, 09:15 AM</div>
+                            <div class="ride-locations">
+                                <span>📍 Saket</span>
+                                <span>🏁 Gurgaon Cyber Hub</span>
+                            </div>
+                            <div class="ride-details">
+                                <span class="ride-fare">₹280</span>
+                                <span class="status-badge completed">Completed</span>
+                            </div>
+                        </div>
+                        <div class="ride-icon" aria-hidden="true">🚗</div>
+                    </button>
+                </li>
+                <li class="ride-card-wrapper" data-status="cancelled" style="animation-delay: 0.3s;">
+                    <button class="ride-card" aria-label="View details for ride on October 14, 2025">
+                        <div class="ride-info">
+                            <div class="ride-meta">Oct 14, 2025, 06:00 PM</div>
+                            <div class="ride-locations">
+                                <span>📍 Noida Sector 18</span>
+                                <span>🏁 Akshardham</span>
+                            </div>
+                            <div class="ride-details">
+                                <span class="ride-fare">₹210</span>
+                                <span class="status-badge cancelled">Cancelled</span>
+                            </div>
+                        </div>
+                        <div class="ride-icon" aria-hidden="true">🚕</div>
+                    </button>
+                </li>
+            </ul>
+        </main>
+    </div>
+
+    <div id="ride-detail-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h2 id="modal-title">Trip Details</h2>
+                <button id="close-modal-btn" class="close-btn" aria-label="Close modal">&times;</button>
+            </header>
+            <main>
+                <div class="modal-detail-row"><span>Driver</span> <span>Priya Sharma</span></div>
+                <div class="modal-detail-row"><span>Vehicle</span> <span>Maruti Dzire (DL1CAB1234)</span></div>
+                <div class="modal-detail-row"><span>Payment</span> <span>UPI</span></div>
+                <div class="modal-detail-row"><span>Total Fare</span> <span>₹157.00</span></div>
+                <div class="modal-detail-row"><span>Trip ID</span> <span>SR101725XYZ</span></div>
+            </main>
+            <footer>
+                <button class="modal-cta">Rate Driver</button>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Selection ---
+            const segmentedControl = document.getElementById('segmented-control');
+            const controlButtons = segmentedControl.querySelectorAll('.control-button');
+            const controlPill = document.getElementById('control-pill');
+            const rideList = document.getElementById('ride-list');
+            const rideCards = document.querySelectorAll('.ride-card');
+            const modal = document.getElementById('ride-detail-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+
+            // --- CORRECTED Segmented Control Logic ---
+            
+            // This function moves and resizes the pill to match the target button
+            const movePill = (targetButton) => {
+                const newWidth = targetButton.offsetWidth;
+                const newPosition = targetButton.offsetLeft;
+
+                controlPill.style.width = `${newWidth}px`;
+                controlPill.style.transform = `translateX(${newPosition}px)`;
+            };
+
+            controlButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // Update active button state
+                    controlButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-pressed', 'false');
+                    });
+                    button.classList.add('active');
+                    button.setAttribute('aria-pressed', 'true');
+
+                    // Move and resize the pill to the clicked button
+                    movePill(e.currentTarget);
+
+                    // Filter the list
+                    const filter = button.dataset.filter;
+                    const rideItems = rideList.querySelectorAll('.ride-card-wrapper');
+                    
+                    rideItems.forEach(item => {
+                        if (filter === 'all' || item.dataset.status === filter) {
+                            item.classList.remove('hidden');
+                        } else {
+                            item.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+            
+            // Set initial position and size of the pill on page load
+            const initialActiveButton = segmentedControl.querySelector('.control-button.active');
+            if (initialActiveButton) {
+                // We use a small timeout to ensure the browser has calculated the layout
+                setTimeout(() => {
+                    movePill(initialActiveButton);
+                }, 50);
+            }
+
+            // --- Modal Interaction Logic ---
+            const showModal = () => {
+                modal.classList.add('visible');
+            };
+
+            const hideModal = () => {
+                modal.classList.remove('visible');
+            };
+
+            // Open modal when any ride card is clicked
+            rideCards.forEach(card => {
+                card.addEventListener('click', showModal);
+            });
+
+            // Close modal with button or by clicking the overlay
+            closeModalBtn.addEventListener('click', hideModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    hideModal();
+                }
+            });
+
+            // Close modal with the Escape key for accessibility
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('visible')) {
+                    hideModal();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

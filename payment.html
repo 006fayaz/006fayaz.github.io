@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SheRide - Payment</title>
+    
+    <style>
+        /* ============================================= */
+        /* CSS Variables & Global Styles                 */
+        /* ============================================= */
+        :root {
+            /* Color Palette */
+            --bg-gradient: linear-gradient(160deg, #fff0f5 0%, #ffe4e1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --cta-gradient: linear-gradient(90deg, #ff85a2 0%, #ff6b95 100%);
+            --cta-shadow-color: rgba(255, 107, 149, 0.4);
+            --text-primary: #581845;
+            --text-secondary: #900c3f;
+            --shadow-color: rgba(215, 153, 183, 0.2);
+            --star-color-default: #d1b4c3;
+            --star-color-active: #ffc107;
+            
+            /* Sizing & Radius */
+            --radius-pill: 100px;
+            --radius-card: 24px;
+            --radius-button: 20px;
+
+            /* Effects */
+            --blur-amount: 14px;
+            --shadow-light: 0 4px 12px var(--shadow-color);
+            --shadow-heavy: 0 8px 30px var(--shadow-color);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================= */
+        /* Page Container & Layout                       */
+        /* ============================================= */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            max-width: 375px;
+            max-height: 812px;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--bg-gradient);
+            padding: 40px 24px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 24px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        .page-header h1 { font-size: 2rem; }
+
+        /* ============================================= */
+        /* Glass Card Base Style                         */
+        /* ============================================= */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            animation: fadeInUp 0.7s ease-out both;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        /* ============================================= */
+        /* Ride Summary Card                             */
+        /* ============================================= */
+        .fare-breakdown { animation-delay: 0.1s; }
+        .fare-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            padding: 8px 0;
+        }
+        .fare-row span:last-child { font-weight: 500; }
+        .fare-row.total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        /* ============================================= */
+        /* Payment Methods Card                          */
+        /* ============================================= */
+        .payment-methods { animation-delay: 0.2s; }
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .payment-option {
+            display: flex;
+            align-items: center;
+            padding: 14px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            background-color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .payment-option:hover { transform: scale(1.02); }
+        .payment-option.selected {
+            border-color: var(--text-secondary);
+        }
+        .payment-option .icon {
+            font-size: 1.5rem;
+            margin-right: 12px;
+            width: 28px;
+            text-align: center;
+        }
+        .payment-option .name { font-weight: 500; }
+        /* Hide actual radio button */
+        .payment-option input[type="radio"] { display: none; }
+
+
+        /* ============================================= */
+        /* CTA Footer                                    */
+        /* ============================================= */
+        .page-footer {
+            padding: 20px 0;
+            animation: fadeInUp 0.7s ease-out 0.3s both;
+        }
+        .cta-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 18px;
+            border-radius: var(--radius-button);
+            border: none;
+            background: var(--cta-gradient);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 20px var(--cta-shadow-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .cta-button:active { transform: scale(0.97); }
+        .cta-button:focus-visible { outline: 2px solid var(--text-secondary); outline-offset: 3px; }
+
+        /* ============================================= */
+        /* Rating Modal Styles                           */
+        /* ============================================= */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .rating-modal {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 24px 30px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: var(--shadow-heavy);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .modal-overlay.visible .rating-modal {
+            transform: scale(1);
+        }
+        .rating-modal h2 { font-size: 1.3rem; margin-bottom: 8px; }
+        .rating-modal p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px; }
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        .star {
+            font-size: 2.5rem;
+            cursor: pointer;
+            color: var(--star-color-default);
+            transition: transform 0.1s ease, color 0.2s ease;
+        }
+        .star:hover { transform: scale(1.2); }
+        .star.selected, .star.hovered { color: var(--star-color-active); }
+
+        /* ============================================= */
+        /* Keyframe Animations                           */
+        /* ============================================= */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <header class="page-header">
+            <h1>Ride Summary</h1>
+        </header>
+
+        <main>
+            <section class="glass-card fare-breakdown" aria-labelledby="fare-title">
+                <h2 id="fare-title" class="section-title">Fare Details</h2>
+                <div class="fare-row">
+                    <span>Base Fare</span>
+                    <span>₹50.00</span>
+                </div>
+                <div class="fare-row">
+                    <span>Distance (8.2 km)</span>
+                    <span>₹82.00</span>
+                </div>
+                <div class="fare-row">
+                    <span>Time (25 min)</span>
+                    <span>₹25.00</span>
+                </div>
+                <div class="fare-row total">
+                    <span>Total Payable</span>
+                    <span>₹157.00</span>
+                </div>
+            </section>
+
+            <section class="glass-card payment-methods" aria-labelledby="payment-title">
+                <h2 id="payment-title" class="section-title">Select Payment Method</h2>
+                <div id="payment-group" class="payment-options" role="radiogroup">
+                    
+                    <label class="payment-option selected" for="pay-upi" aria-label="Pay with UPI">
+                        <input type="radio" id="pay-upi" name="payment" value="upi" checked>
+                        <span class="icon" aria-hidden="true">💸</span>
+                        <span class="name">UPI / Google Pay</span>
+                    </label>
+
+                    <label class="payment-option" for="pay-card" aria-label="Pay with Card">
+                        <input type="radio" id="pay-card" name="payment" value="card">
+                        <span class="icon" aria-hidden="true">💳</span>
+                        <span class="name">Credit / Debit Card</span>
+                    </label>
+
+                    <label class="payment-option" for="pay-wallet" aria-label="Pay with Wallet">
+                        <input type="radio" id="pay-wallet" name="payment" value="wallet">
+                        <span class="icon" aria-hidden="true">👛</span>
+                        <span class="name">SheRide Wallet</span>
+                    </label>
+
+                </div>
+            </section>
+        </main>
+        
+        <footer class="page-footer">
+            <button id="pay-btn" class="cta-button">Pay ₹157 & Rate</button>
+        </footer>
+    </div>
+    
+    <div id="rating-modal-overlay" class="modal-overlay" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+        <div class="rating-modal">
+            <h2 id="modal-title">Payment Successful!</h2>
+            <p>Please rate your ride with Priya.</p>
+            <div id="star-rating-container" class="star-rating" role="radiogroup" aria-label="Rate your ride from 1 to 5 stars">
+                <span class="star" role="radio" data-value="1" aria-label="1 star" tabindex="0">★</span>
+                <span class="star" role="radio" data-value="2" aria-label="2 stars" tabindex="0">★</span>
+                <span class="star" role="radio" data-value="3" aria-label="3 stars" tabindex="0">★</span>
+                <span class="star" role="radio" data-value="4" aria-label="4 stars" tabindex="0">★</span>
+                <span class="star" role="radio" data-value="5" aria-label="5 stars" tabindex="0">★</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Payment Method Selection ---
+            const paymentGroup = document.getElementById('payment-group');
+            const paymentOptions = paymentGroup.querySelectorAll('.payment-option');
+
+            paymentGroup.addEventListener('click', (e) => {
+                const selectedLabel = e.target.closest('.payment-option');
+                if (!selectedLabel) return;
+
+                // Remove 'selected' class from all options
+                paymentOptions.forEach(option => option.classList.remove('selected'));
+                // Add 'selected' class to the clicked option
+                selectedLabel.classList.add('selected');
+                // Check the hidden radio button
+                selectedLabel.querySelector('input[type="radio"]').checked = true;
+            });
+
+            // --- Modal and Rating Logic ---
+            const payBtn = document.getElementById('pay-btn');
+            const modalOverlay = document.getElementById('rating-modal-overlay');
+            const stars = document.querySelectorAll('.star');
+            let currentRating = 0;
+
+            // Show modal on button click
+            payBtn.addEventListener('click', () => {
+                modalOverlay.classList.add('visible');
+            });
+
+            // Hide modal if overlay is clicked
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    modalOverlay.classList.remove('visible');
+                }
+            });
+
+            const updateStars = (rating, state = 'selected') => {
+                stars.forEach(star => {
+                    star.classList.remove('selected', 'hovered');
+                    if (parseInt(star.dataset.value) <= rating) {
+                        star.classList.add(state);
+                    }
+                });
+            };
+
+            stars.forEach(star => {
+                star.addEventListener('mouseover', () => {
+                    updateStars(star.dataset.value, 'hovered');
+                });
+
+                star.addEventListener('mouseout', () => {
+                    updateStars(currentRating, 'selected');
+                });
+
+                star.addEventListener('click', () => {
+                    currentRating = star.dataset.value;
+                    updateStars(currentRating, 'selected');
+                    console.log(`Rated: ${currentRating} stars`);
+                    // Here you would typically submit the rating and close the modal
+                    setTimeout(() => {
+                        alert(`Thanks for rating ${currentRating} stars!`);
+                        modalOverlay.classList.remove('visible');
+                         window.location.href = 'ride_progress.html';
+                    }, 500);
+
+                
+                });
+
+                // Keyboard accessibility
+                star.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        star.click();
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

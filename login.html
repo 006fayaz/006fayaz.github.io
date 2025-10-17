@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SheRide - Sign Up</title>
+    
+    <style>
+        /* ============================================= */
+        /* CSS Variables & Global Styles                 */
+        /* ============================================= */
+        :root {
+            /* Color Palette */
+            --bg-gradient: linear-gradient(160deg, #fff0f5 0%, #ffe4e1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --cta-gradient: linear-gradient(90deg, #ff85a2 0%, #ff6b95 100%);
+            --cta-shadow-color: rgba(255, 107, 149, 0.4);
+            --text-primary: #581845;
+            --text-secondary: #900c3f;
+            --text-placeholder: #a36f8a;
+            --error-color: #d90429;
+            --shadow-color: rgba(215, 153, 183, 0.15);
+            
+            /* Sizing & Radius */
+            --radius-pill: 100px;
+            --radius-card: 24px;
+            --radius-button: 20px;
+
+            /* Effects */
+            --blur-amount: 12px;
+            --shadow-light: 0 4px 12px var(--shadow-color);
+            --shadow-heavy: 0 8px 30px var(--shadow-color);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================= */
+        /* Page Container & Layout                       */
+        /* ============================================= */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            max-width: 375px;
+            max-height: 812px;
+            position: relative;
+            overflow-y: auto;
+            background: var(--bg-gradient);
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* ============================================= */
+        /* Header & Form Styles                          */
+        /* ============================================= */
+        .signup-header {
+            text-align: center;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .signup-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .signup-header p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+        
+        .signup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        /* ============================================= */
+        /* Input Fields with Floating Labels             */
+        /* ============================================= */
+        .input-group {
+            position: relative;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 60px; /* Initial height */
+            overflow: hidden;
+        }
+
+        .input-field {
+            width: 100%;
+            height: 56px;
+            padding: 16px 20px;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            font-size: 1rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-field::placeholder { /* Used to trigger :placeholder-shown */
+            color: transparent;
+        }
+
+        .input-label {
+            position: absolute;
+            left: 20px;
+            top: 23px;
+            pointer-events: none;
+            color: var(--text-placeholder);
+            transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease;
+        }
+
+        /* Floating label animation */
+        .input-field:focus + .input-label,
+        .input-field:not(:placeholder-shown) + .input-label {
+            transform: translateY(-26px) translateX(-10px) scale(0.85);
+            color: var(--text-secondary);
+            background-color: #fff0f5; /* Match bg to avoid text overlap */
+            padding: 0 4px;
+        }
+
+        /* Focus state for input */
+        .input-field:focus {
+            border-color: var(--text-secondary);
+            box-shadow: 0 0 0 3px rgba(144, 12, 63, 0.2);
+        }
+
+        /* Error state */
+        .input-field.error {
+            border-color: var(--error-color);
+            animation: shake 0.4s;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.8rem;
+            padding-left: 20px;
+            margin-top: 4px;
+            display: none; /* Hidden by default */
+        }
+
+        /* ============================================= */
+        /* OTP Input Styles                              */
+        /* ============================================= */
+        #otp-group {
+            max-height: 0; /* Initially hidden */
+            opacity: 0;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out 0.2s;
+            text-align: center;
+        }
+        
+        #otp-group p {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        #otp-input {
+             width: 100%;
+            height: 56px;
+            padding: 16px 20px;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            font-size: 1rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        /* ============================================= */
+        /* Buttons & Separator                           */
+        /* ============================================= */
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            margin-top: 8px;
+            border-radius: var(--radius-button);
+            border: none;
+            background: var(--cta-gradient);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 20px var(--cta-shadow-color);
+            transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.2s ease;
+        }
+        
+        .cta-button:focus-visible {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: 3px;
+        }
+        
+        .cta-button:active {
+            transform: scale(0.97);
+            box-shadow: 0 3px 10px var(--cta-shadow-color);
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-placeholder);
+            margin: 24px 0;
+            font-size: 0.8rem;
+        }
+        .separator::before, .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        a {
+  text-decoration: none;
+}
+
+        .separator:not(:empty)::before { margin-right: .5em; }
+        .separator:not(:empty)::after { margin-left: .5em; }
+
+        .ghost-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            border-radius: var(--radius-button);
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .ghost-button:hover, .ghost-button:focus-visible {
+            background: rgba(255, 255, 255, 0.6);
+        }
+        
+        .ghost-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ============================================= */
+        /* Keyframe Animations                           */
+        /* ============================================= */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-4px); }
+            40%, 60% { transform: translateX(4px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container" role="application">
+        
+        <header class="signup-header">
+            <h1>Create Account</h1>
+            <p>Your safe ride is just a step away.</p>
+        </header>
+
+        <main>
+            <form id="signup-form" class="signup-form" novalidate>
+                
+                <div id="name-group" class="input-group">
+                    <input type="text" id="full-name" class="input-field" placeholder="Full Name" required autocomplete="name">
+                    <label for="full-name" class="input-label">Full Name</label>
+                </div>
+                
+                <div id="mobile-group" class="input-group">
+                    <input type="tel" id="mobile-number" class="input-field" placeholder="Mobile Number" required autocomplete="tel" inputmode="numeric" maxlength="10">
+                    <label for="mobile-number" class="input-label">Mobile Number</label>
+                </div>
+                <div id="mobile-error" class="error-message" role="alert">Please enter a valid 10-digit number.</div>
+                
+                <div id="otp-group" class="input-group">
+                  
+                    <input type="text" id="otp-input" class="input-field" placeholder=" " inputmode="numeric" maxlength="4" autocomplete="one-time-code">
+                    <label for="otp-input" class="input-label">OTP</label>
+                </div>
+
+               <button type="submit" id="cta-btn" class="cta-button">Send OTP</button>
+
+
+                <div class="separator">or</div>
+                <a href="home.html"> <button type="button" class="ghost-button" aria-label="Sign in with Google"></a>
+                    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Sign in with Google
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Selection ---
+            const form = document.getElementById('signup-form');
+            const nameGroup = document.getElementById('name-group');
+            const mobileInput = document.getElementById('mobile-number');
+            const mobileError = document.getElementById('mobile-error');
+            const otpGroup = document.getElementById('otp-group');
+            const otpInput = document.getElementById('otp-input');
+            const ctaBtn = document.getElementById('cta-btn');
+
+            let isOtpSent = false;
+
+            // --- Phone Number Validation Function ---
+            const validatePhoneNumber = () => {
+                const phoneRegex = /^\d{10}$/; // Simple regex for a 10-digit number
+                if (phoneRegex.test(mobileInput.value)) {
+                    mobileInput.classList.remove('error');
+                    mobileError.style.display = 'none';
+                    return true;
+                } else {
+                    mobileInput.classList.add('error');
+                    mobileError.style.display = 'block';
+                    return false;
+                }
+            };
+
+            // --- Form Submission Logic ---
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent actual form submission
+
+                if (!isOtpSent) {
+                    // --- Stage 1: Send OTP ---
+                    if (validatePhoneNumber()) {
+                        console.log('OTP requested for:', mobileInput.value);
+                        
+                        // Transition UI to OTP state
+                        isOtpSent = true;
+                        
+                        // Hide full name and mobile error message
+                        nameGroup.style.maxHeight = '0';
+                        nameGroup.style.opacity = '0';
+                        nameGroup.style.marginTop = '-16px'; // Collapse margin
+                        mobileError.style.display = 'none';
+
+                        // Show OTP input
+                        otpGroup.style.maxHeight = '100px';
+                        otpGroup.style.opacity = '1';
+                        
+                        // Update button text and focus on OTP input
+                        ctaBtn.textContent = 'Verify & Continue';
+                        setTimeout(() => otpInput.focus(), 500); // Focus after transition
+                    }
+                } else {
+                    // --- Stage 2: Verify OTP ---
+                    console.log('Verifying OTP:', otpInput.value);
+                    // Add OTP verification logic here.
+                    // For this demo, we'll just log it.
+                    if (otpInput.value.length === 4) {
+                        window.location.href = 'home.html';
+                    } else {
+                        alert('Please enter a 4-digit OTP.');
+                    }
+                }
+            });
+            
+            // --- Real-time validation feedback on input blur ---
+            mobileInput.addEventListener('blur', validatePhoneNumber);
+        });
+    </script>
+
+</body>
+</html>

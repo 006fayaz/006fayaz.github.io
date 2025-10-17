@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SheRide - Profile</title>
+    
+    <style>
+        /* ============================================= */
+        /* CSS Variables & Global Styles                 */
+        /* ============================================= */
+        :root {
+            /* Color Palette (Light - Default) */
+            --bg-gradient: linear-gradient(160deg, #fff0f5 0%, #ffe4e1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --text-primary: #581845;
+            --text-secondary: #900c3f;
+            --badge-bg: linear-gradient(90deg, #ff85a2 0%, #ff6b95 100%);
+            --badge-text: white;
+            --toggle-bg: rgba(0, 0, 0, 0.1);
+            --shadow-color: rgba(215, 153, 183, 0.2);
+            
+            /* Sizing & Radius */
+            --radius-pill: 100px;
+            --radius-card: 24px;
+            --radius-button: 20px;
+
+            /* Effects */
+            --blur-amount: 14px;
+            --shadow-light: 0 4px 12px var(--shadow-color);
+            --shadow-heavy: 0 8px 30px var(--shadow-color);
+
+            /* Transitions */
+            --theme-transition: all 0.3s ease-in-out;
+        }
+
+        /* --- Dark Accent Theme Overrides --- */
+        .dark-accent {
+            --bg-gradient: linear-gradient(160deg, #4c2a3c 0%, #3d1b2a 100%);
+            --glass-bg: rgba(40, 20, 30, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-primary: #fce4ec;
+            --text-secondary: #ff85a2;
+            --badge-bg: linear-gradient(90deg, #ff6b95 0%, #ff85a2 100%);
+            --badge-text: #fff;
+            --toggle-bg: rgba(255, 255, 255, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: var(--theme-transition);
+        }
+
+        /* ============================================= */
+        /* Page Container & Layout                       */
+        /* ============================================= */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            max-width: 375px;
+            max-height: 812px;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 40px 24px;
+        }
+
+        /* ============================================= */
+        /* Profile Header                                */
+        /* ============================================= */
+        .profile-header {
+            text-align: center;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.7s ease-out;
+        }
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #ffc2d1;
+            border: 4px solid white;
+            margin: 0 auto 16px auto;
+            box-shadow: var(--shadow-heavy);
+        }
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            transition: var(--theme-transition);
+        }
+        .membership-badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 16px;
+            border-radius: var(--radius-pill);
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-light);
+            transition: var(--theme-transition);
+        }
+
+        /* ============================================= */
+        /* Settings List                                 */
+        /* ============================================= */
+        .settings-nav {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .settings-tile {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-button);
+            padding: 18px;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            transition: transform 0.2s ease, box-shadow 0.2s ease, var(--theme-transition);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Staggered animation delays */
+        .settings-tile:nth-child(1) { animation-delay: 0.2s; }
+        .settings-tile:nth-child(2) { animation-delay: 0.3s; }
+        .settings-tile:nth-child(3) { animation-delay: 0.4s; }
+        .settings-tile:nth-child(4) { animation-delay: 0.5s; }
+        .settings-tile:nth-child(5) { animation-delay: 0.6s; }
+        
+        .settings-tile:hover, .settings-tile:focus-visible {
+            transform: scale(1.03);
+            box-shadow: var(--shadow-heavy);
+        }
+        .settings-tile:focus-visible {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: 3px;
+        }
+
+        .tile-icon {
+            font-size: 1.5rem;
+            width: 32px;
+            margin-right: 16px;
+        }
+        .tile-title {
+            flex-grow: 1;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .tile-chevron {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            transition: var(--theme-transition);
+        }
+
+        /* ============================================= */
+        /* Accent Toggle                                 */
+        /* ============================================= */
+        .theme-toggle-section {
+            margin-top: 32px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 0.8s forwards;
+        }
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            padding: 12px 20px;
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            transition: var(--theme-transition);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: var(--toggle-bg);
+            border-radius: var(--radius-pill);
+            transition: var(--theme-transition);
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: var(--theme-transition);
+        }
+        input:checked + .slider {
+            background-color: var(--text-secondary);
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+        input:focus-visible + .slider {
+            box-shadow: 0 0 0 2px var(--bg-gradient), 0 0 0 4px var(--text-secondary);
+        }
+
+        /* ============================================= */
+        /* Keyframe Animations                           */
+        /* ============================================= */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body id="page-body">
+
+    <div class="page-container">
+        
+        <header class="profile-header">
+            <div class="profile-avatar" role="img" aria-label="Priya Sharma's profile picture"></div>
+            <h1 class="profile-name">Priya Sharma</h1>
+            <span class="membership-badge">Gold Member</span>
+        </header>
+
+        <main>
+            <nav aria-label="User Settings">
+                <ul class="settings-nav">
+                    <li>
+                        <a href="#" class="settings-tile">
+                            <span class="tile-icon" aria-hidden="true">✏️</span>
+                            <span class="tile-title">Edit Profile</span>
+                            <span class="tile-chevron" aria-hidden="true">&gt;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="payment.html" class="settings-tile">
+                            <span class="tile-icon" aria-hidden="true">💳</span>
+                            <span class="tile-title">Payments</span>
+                            <span class="tile-chevron" aria-hidden="true">&gt;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="ride_history.html" class="settings-tile">
+                            <span class="tile-icon" aria-hidden="true">📜</span>
+                            <span class="tile-title">Ride History</span>
+                            <span class="tile-chevron" aria-hidden="true">&gt;</span>
+                        </a>
+                    </li>
+                     <li>
+                        <a href="safety.html" class="settings-tile">
+                            <span class="tile-icon" aria-hidden="true">🛡️</span>
+                            <span class="tile-title">Safety Settings</span>
+                            <span class="tile-chevron" aria-hidden="true">&gt;</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="home.html" class="settings-tile">
+                            <span class="tile-icon" aria-hidden="true">🏠</span>
+                            <span class="tile-title">Home</span>
+                            <span class="tile-chevron" aria-hidden="true">&gt;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <section class="theme-toggle-section" aria-label="Appearance Settings">
+                <div class="toggle-container">
+                    <span class="toggle-label" id="theme-label">Dark Accent</span>
+                    <label class="toggle-switch" for="theme-toggle" aria-labelledby="theme-label">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Theme Toggle Logic ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const pageBody = document.getElementById('page-body');
+
+            // Listen for changes on the checkbox
+            themeToggle.addEventListener('change', () => {
+                // Toggle the 'dark-accent' class on the body element
+                pageBody.classList.toggle('dark-accent', themeToggle.checked);
+            });
+        });
+    </script>
+
+</body>
+</html>

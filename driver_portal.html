@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SheRide - Driver Dashboard</title>
+    
+    <style>
+        /* ============================================= */
+        /* CSS Variables & Global Styles                 */
+        /* ============================================= */
+        :root {
+            /* Color Palette */
+            --bg-gradient: linear-gradient(160deg, #fff0f5 0%, #ffe4e1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --cta-gradient: linear-gradient(90deg, #ff85a2 0%, #ff6b95 100%);
+            --cta-shadow-color: rgba(255, 107, 149, 0.4);
+            --accept-color: #2ecc71;
+            --accept-shadow-color: rgba(46, 204, 113, 0.4);
+            --reject-color: #95a5a6;
+            --text-primary: #581845;
+            --text-secondary: #900c3f;
+            --shadow-color: rgba(215, 153, 183, 0.2);
+            
+            /* Sizing & Radius */
+            --radius-pill: 100px;
+            --radius-card: 20px;
+            --radius-button: 16px;
+
+            /* Effects */
+            --blur-amount: 14px;
+            --shadow-light: 0 4px 12px var(--shadow-color);
+            --shadow-heavy: 0 8px 30px var(--shadow-color);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================= */
+        /* Page Container & Layout                       */
+        /* ============================================= */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            max-width: 375px;
+            max-height: 812px;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 40px 24px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        .page-header h1 { font-size: 2rem; }
+
+        /* ============================================= */
+        /* Online/Offline Toggle                         */
+        /* ============================================= */
+        .status-toggle {
+            margin-bottom: 24px;
+            animation: fadeInDown 0.6s ease-out 0.1s;
+        }
+        .toggle-switch {
+            display: block;
+            width: 100%;
+            height: 60px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            box-shadow: var(--shadow-light);
+        }
+        .toggle-switch input { display: none; }
+        .toggle-slider {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            bottom: 5px;
+            width: 50%;
+            background: white;
+            border-radius: var(--radius-pill);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: grid;
+            place-items: center;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            transform: translateX(calc(100% - 10px));
+            background: var(--cta-gradient);
+            color: white;
+        }
+        .toggle-switch:focus-within {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: 3px;
+        }
+
+        /* ============================================= */
+        /* Stats Grid                                    */
+        /* ============================================= */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+            animation: fadeInUp 0.7s ease-out 0.2s both;
+        }
+        .stat-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+        }
+        .stat-card .label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        /* ============================================= */
+        /* Ride Requests                                 */
+        /* ============================================= */
+        .ride-requests { animation: fadeInUp 0.7s ease-out 0.3s both; }
+        .ride-requests h2 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+        }
+        .requests-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .request-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .request-card.is-processing {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        .request-card.is-accepting {
+            animation: acceptGlow 0.5s ease-out, fadeOut 0.5s 0.5s ease-out forwards;
+        }
+        
+        .request-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .request-info .distance { font-weight: 600; }
+        .request-info .fare { font-weight: 700; color: var(--text-secondary); }
+        .request-locations {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            border-left: 2px solid var(--text-secondary);
+            padding-left: 12px;
+        }
+        .request-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .request-actions button {
+            flex-grow: 1;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-button);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .request-actions button:active { transform: scale(0.97); }
+        .request-actions button:focus-visible { outline-offset: 3px; }
+        
+        .reject-btn {
+            background-color: rgba(255,255,255,0.7);
+            color: #555;
+        }
+        .reject-btn:focus-visible { outline: 2px solid #555; }
+
+        .accept-btn {
+            background-color: var(--accept-color);
+            color: white;
+            box-shadow: 0 4px 15px var(--accept-shadow-color);
+        }
+        .accept-btn:focus-visible { outline: 2px solid var(--accept-color); }
+
+        /* ============================================= */
+        /* Keyframe Animations                           */
+        /* ============================================= */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: scale(0.95); height: 0; padding: 0; margin: 0; border: 0; }
+        }
+        @keyframes acceptGlow {
+            50% { box-shadow: 0 0 20px var(--accept-shadow-color); transform: scale(1.02); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <header class="page-header">
+            <h1>Your Dashboard</h1>
+        </header>
+
+        <main>
+            <section class="status-toggle">
+                <label class="toggle-switch" for="status-checkbox" aria-label="Toggle online or offline status">
+                    <input type="checkbox" id="status-checkbox" checked>
+                    <span id="toggle-text" class="toggle-slider">Online</span>
+                </label>
+            </section>
+            
+            <section class="stats-grid" aria-label="Performance statistics">
+                <div class="stat-card">
+                    <div class="label">Today's Earnings</div>
+                    <div class="value">₹1250</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">My Rating</div>
+                    <div class="value">⭐ 4.9</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Weekly Earnings</div>
+                    <div class="value">₹8540</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Active Rides</div>
+                    <div class="value">1</div>
+                </div>
+            </section>
+            
+            <section class="ride-requests" aria-labelledby="requests-title">
+                <h2 id="requests-title">Ride Requests</h2>
+                <ul id="requests-list" class="requests-list">
+                    <li class="request-card">
+                        <div class="request-info">
+                            <span class="distance">4.5 km</span>
+                            <span class="fare">₹85</span>
+                        </div>
+                        <div class="request-locations">
+                            <strong>From:</strong> Connaught Place<br>
+                            <strong>To:</strong> Hauz Khas Village
+                        </div>
+                        <div class="request-actions">
+                            <button class="reject-btn" aria-label="Reject ride from Connaught Place">Reject</button>
+                            <button class="accept-btn" aria-label="Accept ride from Connaught Place">Accept</button>
+                        </div>
+                    </li>
+                    <li class="request-card">
+                        <div class="request-info">
+                            <span class="distance">8.2 km</span>
+                            <span class="fare">₹157</span>
+                        </div>
+                        <div class="request-locations">
+                            <strong>From:</strong> Saket<br>
+                            <strong>To:</strong> IGI Airport T3
+                        </div>
+                        <div class="request-actions">
+                            <button class="reject-btn" aria-label="Reject ride from Saket">Reject</button>
+                            <button class="accept-btn" aria-label="Accept ride from Saket">Accept</button>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Online/Offline Toggle Logic ---
+            const statusCheckbox = document.getElementById('status-checkbox');
+            const toggleText = document.getElementById('toggle-text');
+
+            statusCheckbox.addEventListener('change', () => {
+                if (statusCheckbox.checked) {
+                    toggleText.textContent = 'Online';
+                } else {
+                    toggleText.textContent = 'Offline';
+                }
+                // You could add further logic here, e.g., to hide/show the ride requests.
+            });
+
+            // --- Ride Request Accept/Reject Logic ---
+            const requestsList = document.getElementById('requests-list');
+
+            requestsList.addEventListener('click', (e) => {
+                const target = e.target;
+                const card = target.closest('.request-card');
+                if (!card) return;
+
+                if (target.classList.contains('reject-btn')) {
+                    card.classList.add('is-processing');
+                    // Remove from DOM after animation completes
+                    card.addEventListener('animationend', () => card.remove(), { once: true });
+                }
+
+                if (target.classList.contains('accept-btn')) {
+                    card.classList.add('is-accepting');
+                    // Remove from DOM after all animations complete
+                    card.addEventListener('animationend', (event) => {
+                        // Ensure we only trigger remove on the final 'fadeOut' animation
+                        if(event.animationName === 'fadeOut') {
+                           card.remove();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

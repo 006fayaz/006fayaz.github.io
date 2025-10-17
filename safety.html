@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SheRide - Safety Center</title>
+    
+    <style>
+        /* ============================================= */
+        /* CSS Variables & Global Styles                 */
+        /* ============================================= */
+        :root {
+            /* Color Palette */
+            --bg-gradient: linear-gradient(160deg, #fff0f5 0%, #ffe4e1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --sos-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+            --sos-shadow-color: rgba(255, 71, 87, 0.5);
+            --text-primary: #581845;
+            --text-secondary: #900c3f;
+            --shadow-color: rgba(215, 153, 183, 0.2);
+            
+            /* Sizing & Radius */
+            --radius-pill: 100px;
+            --radius-card: 24px;
+            --radius-button: 20px;
+
+            /* Effects */
+            --blur-amount: 14px;
+            --shadow-light: 0 4px 12px var(--shadow-color);
+            --shadow-heavy: 0 8px 30px var(--shadow-color);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================= */
+        /* Page Container & Layout                       */
+        /* ============================================= */
+        .page-container {
+            width: 100%;
+            height: 100%;
+            max-width: 375px;
+            max-height: 812px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 24px;
+        }
+
+        .page-header {
+            text-align: center;
+            flex-shrink: 0;
+            margin-bottom: 24px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        .page-header h1 { font-size: 2rem; }
+
+        /* ============================================= */
+        /* Safety Actions Grid                           */
+        /* ============================================= */
+        .safety-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            flex-shrink: 0;
+            margin-bottom: 24px;
+        }
+
+        .action-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 110px;
+            text-decoration: none;
+            color: var(--text-primary);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-button);
+            padding: 16px;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            opacity: 0;
+            transform: scale(0.9);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        
+        /* Staggered animation */
+        .action-tile:nth-child(1) { grid-column: 1 / -1; animation-delay: 0.1s; } /* Span full width */
+        .action-tile:nth-child(2) { animation-delay: 0.2s; }
+        .action-tile:nth-child(3) { animation-delay: 0.3s; }
+        
+        .action-tile:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+        .action-tile:focus-visible {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: 3px;
+        }
+
+        .action-tile .icon { font-size: 2rem; }
+
+        /* ============================================= */
+        /* Safety Tips Card                              */
+        /* ============================================= */
+        .safety-tips-card {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 150px; /* Ensure it has some height on smaller screens */
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 20px;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
+            animation: fadeInUp 0.7s ease-out 0.4s both;
+        }
+        .safety-tips-card h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        .tips-list {
+            list-style: none;
+            overflow-y: auto;
+            padding-right: 10px; /* Space for scrollbar */
+        }
+        .tips-list li {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            padding-bottom: 12px;
+        }
+        /* Custom scrollbar */
+        .tips-list::-webkit-scrollbar { width: 5px; }
+        .tips-list::-webkit-scrollbar-track { background: transparent; }
+        .tips-list::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+        .tips-list::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 1); }
+
+        /* ============================================= */
+        /* SOS Button Footer                             */
+        /* ============================================= */
+        .page-footer {
+            flex-shrink: 0;
+            padding-top: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120px; /* Fixed height for positioning */
+        }
+        .sos-button {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: none;
+            background: var(--sos-gradient);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 0 20px var(--sos-shadow-color);
+            animation: pulse 2s infinite ease-in-out, popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s both;
+            transform: scale(0);
+        }
+        .sos-button:focus-visible {
+            outline: 3px solid white;
+            outline-offset: 4px;
+        }
+
+        /* ============================================= */
+        /* Emergency Contact Modal                       */
+        /* ============================================= */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 100;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-card);
+            padding: 24px 30px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: var(--shadow-heavy);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-content h2 { font-size: 1.2rem; margin-bottom: 12px; }
+        .modal-content p { font-size: 1rem; color: var(--text-secondary); margin-bottom: 20px; }
+        .modal-close-btn {
+            margin-top: 10px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* ============================================= */
+        /* Keyframe Animations                           */
+        /* ============================================= */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px var(--sos-shadow-color); }
+            50% { transform: scale(1.05); box-shadow: 0 0 35px var(--sos-shadow-color); }
+            100% { transform: scale(1); box-shadow: 0 0 20px var(--sos-shadow-color); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <header class="page-header">
+            <h1>Safety Center</h1>
+        </header>
+
+        <main style="display: contents;">
+             <section class="safety-actions" aria-label="Quick Safety Actions">
+                <button id="share-location-btn" class="action-tile">
+                    <span class="icon" aria-hidden="true">📍</span>
+                    <span>Share Live Location</span>
+                </button>
+                <a href="tel:100" class="action-tile" aria-label="Call Police at number 100">
+                    <span class="icon" aria-hidden="true">🚓</span>
+                    <span>Call Police</span>
+                </a>
+                <button id="emergency-contact-btn" class="action-tile">
+                    <span class="icon" aria-hidden="true">❤️</span>
+                    <span>Emergency Contact</span>
+                </button>
+            </section>
+            
+            <section class="safety-tips-card" aria-labelledby="tips-title">
+                <h2 id="tips-title">Safety Tips</h2>
+                <ul class="tips-list">
+                    <li>Always verify the driver and vehicle details before starting your trip.</li>
+                    <li>Share your trip status with a trusted contact.</li>
+                    <li>Sit in the back seat and keep your belongings close.</li>
+                    <li>If you feel unsafe, use the SOS button immediately.</li>
+                </ul>
+            </section>
+        </main>
+        
+        <footer class="page-footer">
+            <button id="sos-btn" class="sos-button" aria-label="Activate Emergency SOS">SOS</button>
+        </footer>
+    </div>
+    
+    <div id="contact-modal-overlay" class="modal-overlay" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+        <div class="modal-content">
+            <h2 id="modal-title">Emergency Contact</h2>
+            <p>Your emergency contact is:<br><strong>Mom - +91 98XXXXXX01</strong></p>
+            <button id="modal-close-btn" class="modal-close-btn" aria-label="Close modal">Close</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Selection ---
+            const shareLocationBtn = document.getElementById('share-location-btn');
+            const emergencyContactBtn = document.getElementById('emergency-contact-btn');
+            const sosBtn = document.getElementById('sos-btn');
+            const modalOverlay = document.getElementById('contact-modal-overlay');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+
+            // --- "Share Location" Button Action ---
+            shareLocationBtn.addEventListener('click', () => {
+                const tripLink = 'https://sheride.app/track/XYZ123';
+                navigator.clipboard.writeText(`I'm riding with SheRide. Track my trip here: ${tripLink}`)
+                    .then(() => {
+                        const originalText = shareLocationBtn.querySelector('span:last-child').textContent;
+                        shareLocationBtn.querySelector('span:last-child').textContent = 'Link Copied!';
+                        setTimeout(() => {
+                            shareLocationBtn.querySelector('span:last-child').textContent = originalText;
+                        }, 2000);
+                    }).catch(err => console.error('Failed to copy text: ', err));
+            });
+
+            // --- "Emergency Contact" Modal Logic ---
+            const showModal = () => modalOverlay.classList.add('visible');
+            const hideModal = () => modalOverlay.classList.remove('visible');
+            
+            emergencyContactBtn.addEventListener('click', showModal);
+            modalCloseBtn.addEventListener('click', hideModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) hideModal();
+            });
+
+            // --- "SOS" Button Action (Demo) ---
+            sosBtn.addEventListener('click', () => {
+                const isConfirmed = confirm('ACTIVATE SOS?\nThis will alert our safety team and your emergency contacts immediately.');
+                if (isConfirmed) {
+                    alert('SOS Activated! Our team is responding.');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SheRide - Complete App Demo</title>
+    
+    <style>
+        /* ============================================= */
+        /* CSS Variables & Global Styles                 */
+        /* ============================================= */
+        :root {
+            /* Color Palette (Light - Default) */
+            --bg-gradient: linear-gradient(160deg, #fff0f5 0%, #ffe4e1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --cta-gradient: linear-gradient(90deg, #ff85a2 0%, #ff6b95 100%);
+            --cta-shadow-color: rgba(255, 107, 149, 0.4);
+            --sos-gradient: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+            --sos-shadow-color: rgba(255, 71, 87, 0.5);
+            --accept-color: #2ecc71;
+            --accept-shadow-color: rgba(46, 204, 113, 0.4);
+            --text-primary: #581845;
+            --text-secondary: #900c3f;
+            --text-placeholder: #a36f8a;
+            --shadow-color: rgba(215, 153, 183, 0.2);
+            --glow-color: rgba(255, 107, 149, 0.7);
+            --star-color-default: #d1b4c3;
+            --star-color-active: #ffc107;
+            --badge-bg: var(--cta-gradient);
+            --badge-text: white;
+            --toggle-bg: rgba(0, 0, 0, 0.1);
+            
+            /* Sizing & Radius */
+            --radius-pill: 100px;
+            --radius-card: 24px;
+            --radius-button: 20px;
+
+            /* Effects */
+            --blur-amount: 14px;
+            --shadow-light: 0 4px 12px var(--shadow-color);
+            --shadow-heavy: 0 8px 30px var(--shadow-color);
+
+            /* Transitions */
+            --theme-transition: all 0.3s ease-in-out;
+        }
+
+        /* --- Dark Accent Theme Overrides (for Profile Page) --- */
+        .dark-accent-theme {
+            --bg-gradient: linear-gradient(160deg, #4c2a3c 0%, #3d1b2a 100%);
+            --glass-bg: rgba(40, 20, 30, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-primary: #fce4ec;
+            --text-secondary: #ff85a2;
+            --toggle-bg: rgba(255, 255, 255, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: var(--theme-transition);
+        }
+
+        /* ============================================= */
+        /* App & Page Structure                          */
+        /* ============================================= */
+        .app-container {
+            width: 100%;
+            height: 100%;
+            max-width: 375px;
+            max-height: 812px;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-gradient);
+            transition: var(--theme-transition);
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 24px;
+            overflow-y: auto;
+            transform: scale(0.98);
+        }
+        .page.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        .page.no-padding { padding: 0; }
+
+        /* Generic Header */
+        .page-header { text-align: center; margin-bottom: 24px; flex-shrink: 0; }
+        .page-header h1 { font-size: 2rem; }
+
+        /* ============================================= */
+        /* Page: Onboarding                              */
+        /* ============================================= */
+        #page-onboarding { justify-content: space-between; }
+        .onboarding-header { animation: fadeInDown 0.8s ease-out forwards; }
+        .logo-pill { display: flex; align-items: center; gap: 12px; background-color: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-pill); padding: 8px; width: fit-content; box-shadow: var(--shadow-light); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); }
+        .logo-sr { background: white; color: var(--text-secondary); font-weight: 800; font-size: 1.2rem; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+        .logo-text h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+        .logo-text p { font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); opacity: 0.9; }
+        .onboarding-features { display: flex; flex-direction: column; gap: 16px; margin-top: -20px; }
+        .feature-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-card); padding: 20px; box-shadow: var(--shadow-heavy); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); display: flex; flex-direction: column; gap: 8px; opacity: 0; animation: float 4s ease-in-out infinite, fadeInUp 0.8s ease-out forwards; }
+        .feature-card:nth-child(1) { animation-delay: 0.2s, 0.2s; } .feature-card:nth-child(2) { animation-delay: 0.4s, 0.4s; }
+        .feature-card .icon { font-size: 1.8rem; }
+        .feature-card h2 { font-size: 1.1rem; }
+        .feature-card p { font-size: 0.9rem; line-height: 1.4; color: var(--text-secondary); opacity: 0.9; }
+        .onboarding-footer { padding-bottom: 24px; animation: fadeInUp 0.8s ease-out 0.6s forwards; opacity: 0; }
+        .cta-button { display: block; width: 100%; padding: 18px; border-radius: var(--radius-button); border: none; background: var(--cta-gradient); color: white; font-size: 1.1rem; font-weight: 600; cursor: pointer; box-shadow: 0 6px 20px var(--cta-shadow-color); transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.2s ease; }
+        .cta-button:active { transform: scale(0.97); } .cta-button:focus-visible { outline: 2px solid var(--text-secondary); outline-offset: 3px; }
+
+        /* ============================================= */
+        /* Page: Signup                                  */
+        /* ============================================= */
+        #page-signup { justify-content: center; }
+        .input-group { position: relative; max-height: 60px; overflow: hidden; margin-bottom: 16px; }
+        .input-field { width: 100%; height: 56px; padding: 16px 20px; border: 1px solid var(--glass-border); border-radius: var(--radius-pill); background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); font-size: 1rem; color: var(--text-primary); outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .input-field::placeholder { color: transparent; }
+        .input-label { position: absolute; left: 20px; top: 17px; pointer-events: none; color: var(--text-placeholder); transition: transform 0.2s ease, font-size 0.2s ease, color 0.2s ease; }
+        .input-field:focus + .input-label, .input-field:not(:placeholder-shown) + .input-label { transform: translateY(-26px) translateX(-10px) scale(0.85); color: var(--text-secondary); background-color: #fff0f5; padding: 0 4px; }
+        .input-field:focus { border-color: var(--text-secondary); box-shadow: 0 0 0 3px rgba(144, 12, 63, 0.2); }
+        .error-message { color: #d90429; font-size: 0.8rem; padding-left: 20px; margin-top: -12px; margin-bottom: 8px; display: none; }
+        #otp-group { max-height: 0; opacity: 0; transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out 0.2s; }
+        .separator { display: flex; align-items: center; text-align: center; color: var(--text-placeholder); margin: 24px 0; font-size: 0.8rem; }
+        .separator::before, .separator::after { content: ''; flex: 1; border-bottom: 1px solid var(--glass-border); }
+        .separator:not(:empty)::before { margin-right: .5em; } .separator:not(:empty)::after { margin-left: .5em; }
+        .ghost-button { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; border-radius: var(--radius-button); border: 1px solid var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); color: var(--text-primary); font-size: 1rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; }
+        .ghost-button svg { width: 20px; height: 20px; }
+        
+        /* ============================================= */
+        /* Page: Home                                    */
+        /* ============================================= */
+        .home-header { display: flex; justify-content: space-between; align-items: center; padding: 0 0 16px 0; }
+        .avatar { width: 48px; height: 48px; border-radius: 50%; background-color: #ffc2d1; border: 2px solid white; }
+        .search-container { display: flex; align-items: center; gap: 10px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-pill); padding: 6px; box-shadow: var(--shadow-light); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); }
+        #location-input { flex-grow: 1; border: none; background: transparent; height: 44px; font-size: 1rem; color: var(--text-primary); outline: none; padding-left: 20px; }
+        .request-btn { flex-shrink: 0; padding: 0 20px; height: 44px; border: none; border-radius: var(--radius-pill); background: var(--cta-gradient); color: white; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .quick-actions { display: flex; gap: 10px; padding: 16px 0; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+        .quick-actions::-webkit-scrollbar { display: none; }
+        .chip { flex-shrink: 0; padding: 10px 18px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-pill); font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+        .map-area { flex-grow: 1; position: relative; background: linear-gradient(135deg, #ffdde1 0%, #ffc2d1 100%); margin: 0 -12px; border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-heavy); }
+        .car-icon { position: absolute; top: 50%; left: 50%; font-size: 3rem; transform: translate(-50%, -50%); animation: carBob 3s ease-in-out infinite; }
+        .bottom-nav { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: calc(100% - 48px); z-index: 10; }
+        .nav-bar { display: flex; justify-content: space-around; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-card); padding: 10px 0; box-shadow: var(--shadow-heavy); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); }
+        .nav-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-placeholder); font-size: 0.7rem; padding: 4px 8px; border-radius: 8px; }
+        .nav-btn .icon { font-size: 1.5rem; } .nav-btn.active { color: var(--text-secondary); }
+
+        /* ============================================= */
+        /* Pages: Searching, Driver Found, Ride In Progress */
+        /* ============================================= */
+        .map-background { position: absolute; inset: 0; background: linear-gradient(135deg, #ffdde1 0%, #ffc2d1 100%); display: grid; place-items: center; }
+        .ripple-origin::before, .ripple-origin::after { content: ''; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; border-radius: 50%; background-color: rgba(255, 107, 149, 0.4); transform: translate(-50%, -50%); animation: ripple 2.5s infinite ease-out; }
+        .ripple-origin::after { animation-delay: 1.25s; }
+        .search-overlay { position: relative; width: 100%; height: 100%; background: var(--glass-bg); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+        .loader-container { margin-top: 100px; }
+        .loader { width: 80px; height: 80px; border: 5px solid rgba(255, 255, 255, 0.5); border-top-color: white; border-radius: 50%; margin: 0 auto 20px auto; animation: spin 1.2s linear infinite, glow 1.2s ease-in-out infinite alternate; }
+        .confirm-card { position: absolute; bottom: 0; left: 0; right: 0; background: var(--glass-bg); border-top: 1px solid var(--glass-border); border-top-left-radius: var(--radius-card); border-top-right-radius: var(--radius-card); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); box-shadow: var(--shadow-heavy); padding: 24px; display: flex; flex-direction: column; gap: 20px; transform: translateY(100%); animation: slideUp 0.8s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .ride-progress-card { position: absolute; bottom: 0; left: 0; right: 0; background: var(--glass-bg); border-top: 1px solid var(--glass-border); border-top-left-radius: var(--radius-card); border-top-right-radius: var(--radius-card); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); box-shadow: var(--shadow-heavy); padding: 24px; display: flex; flex-direction: column; gap: 16px; transform: translateY(100%); animation: slideUp 0.8s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .route-svg { width: 80%; height: 80%; overflow: visible; }
+        .route-path { fill: none; stroke: var(--cta-gradient); stroke-width: 6; stroke-linecap: round; opacity: 0.8; }
+        .car-icon-route { position: absolute; font-size: 2.5rem; offset-path: path('M40,250 C100,100 200,100 260,250 S400,400 460,250'); animation: drive 10s linear infinite; }
+        .sos-button-small { background: var(--sos-gradient); color: white; box-shadow: 0 6px 20px var(--sos-shadow-color); animation: pulse 2s infinite ease-in-out; }
+
+        /* ============================================= */
+        /* Page: Payment & Profile & Safety & Driver     */
+        /* ============================================= */
+        .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-card); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-light); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-card); padding: 24px 30px; width: 90%; max-width: 320px; text-align: center; box-shadow: var(--shadow-heavy); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .star-rating { display: flex; justify-content: center; gap: 8px; }
+        .star { font-size: 2.5rem; cursor: pointer; color: var(--star-color-default); transition: transform 0.1s ease, color 0.2s ease; }
+        .star:hover { transform: scale(1.2); } .star.selected, .star.hovered { color: var(--star-color-active); }
+        .profile-header { text-align: center; margin-bottom: 32px; }
+        .profile-avatar { width: 120px; height: 120px; border-radius: 50%; background-color: #ffc2d1; border: 4px solid white; margin: 0 auto 16px auto; box-shadow: var(--shadow-heavy); }
+        .membership-badge { display: inline-block; margin-top: 8px; padding: 6px 16px; border-radius: var(--radius-pill); background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 600; box-shadow: var(--shadow-light); }
+        .settings-nav { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+        .settings-tile { display: flex; align-items: center; text-decoration: none; color: var(--text-primary); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-button); padding: 18px; box-shadow: var(--shadow-light); backdrop-filter: blur(var(--blur-amount)); -webkit-backdrop-filter: blur(var(--blur-amount)); transition: transform 0.2s ease, box-shadow 0.2s ease, var(--theme-transition); }
+        .tile-icon { font-size: 1.5rem; width: 32px; margin-right: 16px; }
+        .tile-title { flex-grow: 1; font-size: 1rem; } .tile-chevron { font-size: 1.2rem; color: var(--text-secondary); }
+        .sos-button-large { width: 90px; height: 90px; border-radius: 50%; border: none; background: var(--sos-gradient); color: white; font-size: 1.5rem; font-weight: 700; cursor: pointer; display: grid; place-items: center; box-shadow: 0 0 20px var(--sos-shadow-color); animation: pulse 2s infinite ease-in-out, popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s both; transform: scale(0); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+        .stat-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-card); padding: 16px; }
+        .stat-card .value { font-size: 1.8rem; font-weight: 700; }
+        .request-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-card); padding: 16px; transition: opacity 0.4s ease, transform 0.4s ease; margin-bottom: 16px; }
+
+        /* ============================================= */
+        /* Developer Debug Menu                          */
+        /* ============================================= */
+        .dev-menu { position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 10px; padding: 5px; z-index: 9999; display: none; }
+        .dev-menu.visible { display: block; }
+        .dev-menu select { background: transparent; color: white; border: none; font-size: 10px; }
+        .dev-menu select option { background: #333; color: white; }
+
+        /* ============================================= */
+        /* Keyframe Animations                           */
+        /* ============================================= */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        @keyframes carBob { 0% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-5px); } 100% { transform: translate(-50%, -50%) translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes glow { from { box-shadow: 0 0 10px -5px var(--glow-color); } to { box-shadow: 0 0 20px 5px var(--glow-color); } }
+        @keyframes ripple { from { width: 10px; height: 10px; opacity: 1; } to { width: 400px; height: 400px; opacity: 0; } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0%); } }
+        @keyframes drive { to { motion-offset: 100%; offset-distance: 100%; } }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 6px 20px var(--sos-shadow-color); } 50% { transform: scale(1.03); box-shadow: 0 8px 30px var(--sos-shadow-color); } 100% { transform: scale(1); box-shadow: 0 6px 20px var(--sos-shadow-color); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        
+    </style>
+</head>
+<body id="app-body">
+
+    <div id="app-container" class="app-container">
+
+        <section id="page-onboarding" class="page active">
+            <header class="onboarding-header">
+                <div class="logo-pill"><div class="logo-sr">SR</div><div class="logo-text"><h1>SheRide</h1><p>Safe · Secure · Women-first rides</p></div></div>
+            </header>
+            <main class="onboarding-features">
+                <div class="feature-card"><span class="icon">🛡️</span><h2>Verified & Safe</h2><p>Every driver is background-checked and trained to ensure your safety.</p></div>
+                <div class="feature-card"><span class="icon">📍</span><h2>SOS & Share ETA</h2><p>Instantly share your ride status or alert our team with one tap.</p></div>
+            </main>
+            <footer class="onboarding-footer"><button class="cta-button" data-navigate="page-signup">Get Started</button></footer>
+        </section>
+
+        <section id="page-signup" class="page">
+            <header class="page-header"><h1>Create Account</h1></header>
+            <main>
+                <form id="signup-form" novalidate>
+                    <div id="name-group" class="input-group"><input type="text" id="full-name" class="input-field" placeholder="Full Name" required><label for="full-name" class="input-label">Full Name</label></div>
+                    <div class="input-group"><input type="tel" id="mobile-number" class="input-field" placeholder="Mobile Number" required inputmode="numeric" maxlength="10"><label for="mobile-number" class="input-label">Mobile Number</label></div>
+                    <div id="mobile-error" class="error-message">Enter a valid 10-digit number.</div>
+                    <div id="otp-group" class="input-group"><input type="text" class="input-field" placeholder=" " inputmode="numeric" maxlength="4"><label class="input-label">OTP</label></div>
+                    <button type="submit" id="signup-cta-btn" class="cta-button">Send OTP</button>
+                    <div class="separator">or</div>
+                    <button type="button" class="ghost-button"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Sign in with Google</button>
+                </form>
+            </main>
+        </section>
+
+        <section id="page-home" class="page no-padding">
+            <div style="padding: 40px 24px 0 24px; display: flex; flex-direction: column;">
+                <header class="home-header"><div class="greeting"><h1>Hi, Priya</h1></div><div class="avatar"></div></header>
+                <section class="ride-actions">
+                    <div class="search-container"><input type="text" id="location-input" placeholder="Where to?"><button class="request-btn" data-navigate="page-searching">Request</button></div>
+                    <div class="quick-actions"><button class="chip">🏠 Home</button><button class="chip">🏢 Work</button><button class="chip">⭐ Saved</button></div>
+                </section>
+            </div>
+            <main class="map-area" style="margin-left: 12px; margin-right: 12px; margin-bottom: 110px;"><div class="car-icon">🚗</div></main>
+            <footer class="bottom-nav"><nav class="nav-bar"><button class="nav-btn active" data-navigate="page-home"> <span class="icon">🏠</span><span>Home</span></button><button class="nav-btn" data-navigate="page-payment"><span class="icon">📜</span><span>Rides</span></button><button class="nav-btn" data-navigate="page-profile"><span class="icon">👤</span><span>Profile</span></button></nav></footer>
+        </section>
+
+        <section id="page-searching" class="page no-padding">
+            <div class="map-background"><div class="ripple-origin"></div></div>
+            <div class="search-overlay">
+                <header class="loader-container"><div class="loader"></div><h1>Finding your driver...</h1><p>Estimated wait: 3-5 mins</p></header>
+                <footer><button class="cta-button" style="margin: 24px;" data-navigate="page-home">Cancel Search</button></footer>
+            </div>
+        </section>
+        
+        <section id="page-driver-found" class="page no-padding">
+            <div class="map-background"></div>
+            <main class="confirm-card">
+                <header><div class="driver-avatar"></div><div><h1 id="ride-status-heading-df">Priya is arriving in 4 min</h1></div></header>
+                <section>...Vehicle & Timeline Info...</section>
+                <footer><button class="cta-button" data-navigate="page-ride-in-progress">Confirm & Continue</button></footer>
+            </main>
+        </section>
+
+        <section id="page-ride-in-progress" class="page no-padding">
+            <div class="map-background"><svg class="route-svg" viewBox="0 0 500 500"><path class="route-path" d="M40,250 C100,100 200,100 260,250 S400,400 460,250"/></svg><div class="car-icon-route">🚗</div></div>
+            <main class="ride-progress-card">
+                <header><h1>En route...</h1></header>
+                <div style="display: flex; gap: 12px; margin-top: auto;"><button class="cta-button sos-button-small" style="flex: 2;">🆘 SOS</button><button class="cta-button" style="flex: 1;" data-navigate="page-payment">End Ride</button></div>
+            </main>
+        </section>
+        
+        <section id="page-payment" class="page">
+            <header class="page-header"><h1>Ride Summary</h1></header>
+            <main><div class="glass-card">...Fare Breakdown...</div><div class="glass-card">...Payment Options...</div></main>
+            <footer><button id="pay-btn" class="cta-button">Pay & Rate</button></footer>
+        </section>
+        
+        <section id="page-profile" class="page">
+            <header class="profile-header"><div class="profile-avatar"></div><h1>Priya Sharma</h1><span class="membership-badge">Gold Member</span></header>
+            <main><nav><ul class="settings-nav"><li><a href="#" class="settings-tile"><span class="tile-icon">✏️</span><span class="tile-title">Edit Profile</span><span class="tile-chevron">&gt;</span></a></li>...more tiles...</ul></nav></main>
+        </section>
+
+        <section id="page-safety" class="page">
+            <header class="page-header"><h1>Safety Center</h1></header>
+            <main style="display: contents;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"><button class="settings-tile" style="flex-direction: column; min-height: 110px;">📍<br>Share</button>...more tiles...</div></main>
+            <footer style="display:flex; justify-content:center; padding-top: 24px;"><button class="sos-button-large">SOS</button></footer>
+        </section>
+
+        <section id="page-driver-dashboard" class="page">
+            <header class="page-header"><h1>Driver Dashboard</h1></header>
+            <main><div class="stats-grid"><div class="stat-card">Earnings<div class="value">₹1250</div></div>...more stats...</div><div class="request-card">Ride Request...<button class="cta-button">Accept</button></div></main>
+        </section>
+    </div>
+
+    <div id="rating-modal-overlay" class="modal-overlay">
+        <div class="modal-content"><h2>Payment Successful!</h2><p>Please rate your ride.</p><div class="star-rating" id="star-rating-container"><span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span></div></div>
+    </div>
+
+    <div id="dev-menu" class="dev-menu">
+        <select id="dev-page-selector">
+            <option value="page-onboarding">Onboarding</option>
+            <option value="page-signup">Signup</option>
+            <option value="page-home">Home</option>
+            <option value="page-searching">Searching</option>
+            <option value="page-driver-found">Driver Found</option>
+            <option value="page-ride-in-progress">In Progress</option>
+            <option value="page-payment">Payment</option>
+            <option value="page-profile">Profile</option>
+            <option value="page-safety">Safety</option>
+            <option value="page-driver-dashboard">Driver Dashboard</option>
+        </select>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // =============================================
+            // DEV MODE & NAVIGATION
+            // =============================================
+            const DEV_MODE = false; // <<< CHANGE TO 'true' TO SHOW DEBUG MENU
+            
+            const appContainer = document.getElementById('app-container');
+            const allPages = document.querySelectorAll('.page');
+            const devMenu = document.getElementById('dev-menu');
+            const devSelector = document.getElementById('dev-page-selector');
+
+            const navigateTo = (pageId) => {
+                allPages.forEach(page => page.classList.remove('active'));
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                }
+            };
+
+            // Setup navigation for all elements with a 'data-navigate' attribute
+            document.body.addEventListener('click', (e) => {
+                const navTarget = e.target.closest('[data-navigate]');
+                if (navTarget) {
+                    const pageId = navTarget.dataset.navigate;
+                    if (pageId === 'page-searching') {
+                        navigateTo(pageId);
+                        // Simulate finding a driver
+                        setTimeout(() => navigateTo('page-driver-found'), 3000);
+                    } else {
+                        navigateTo(pageId);
+                    }
+                }
+            });
+
+            // Developer Menu Logic
+            if (DEV_MODE) {
+                devMenu.classList.add('visible');
+                devSelector.addEventListener('change', (e) => {
+                    navigateTo(e.target.value);
+                });
+            }
+
+            // =============================================
+            // PAGE-SPECIFIC INTERACTIONS
+            // =============================================
+            
+            // --- Signup Page ---
+            const signupForm = document.getElementById('signup-form');
+            const signupCtaBtn = document.getElementById('signup-cta-btn');
+            const mobileInput = document.getElementById('mobile-number');
+            const mobileError = document.getElementById('mobile-error');
+            const nameGroup = document.getElementById('name-group');
+            const otpGroup = document.getElementById('otp-group');
+            let isOtpSent = false;
+            
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const phoneRegex = /^\d{10}$/;
+                
+                if (!isOtpSent) {
+                    if (phoneRegex.test(mobileInput.value)) {
+                        mobileError.style.display = 'none';
+                        isOtpSent = true;
+                        nameGroup.style.maxHeight = '0';
+                        otpGroup.style.maxHeight = '100px';
+                        otpGroup.style.opacity = '1';
+                        signupCtaBtn.textContent = 'Verify & Continue';
+                    } else {
+                        mobileError.style.display = 'block';
+                    }
+                } else {
+                    // OTP verification logic would go here
+                    alert('Signup successful (demo)!');
+                    navigateTo('page-home');
+                }
+            });
+
+            // --- Payment Page ---
+            const payBtn = document.getElementById('pay-btn');
+            const modalOverlay = document.getElementById('rating-modal-overlay');
+            const stars = document.querySelectorAll('.star');
+            let currentRating = 0;
+            
+            payBtn.addEventListener('click', () => modalOverlay.classList.add('visible'));
+            modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove('visible'); });
+            
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    currentRating = star.dataset.value;
+                    alert(`Rated: ${currentRating} stars!`);
+                    modalOverlay.classList.remove('visible');
+                    navigateTo('page-home');
+                });
+            });
+
+            // Add more specific JS interactions for other pages as needed.
+        });
+    </script>
+</body>
+</html>
